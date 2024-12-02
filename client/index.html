@@ -1,0 +1,70 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Weather Data Table</title>
+    <style>
+        table {
+            width: 50%;
+            margin: 20px auto;
+            border-collapse: collapse;
+        }
+        th, td {
+            padding: 10px;
+            border: 1px solid #ddd;
+            text-align: center;
+        }
+        .measureTime {
+            text-align: center;
+            font-style: italic;
+            margin-top: 10px;
+        }
+    </style>
+</head>
+<body>
+<h1 style="text-align: center;">Dades meteorològiques</h1>
+<table>
+    <thead>
+    <tr>
+        <th>Temperatura (°C)</th>
+        <th>Humitat (%)</th>
+        <th>Pressió (hPa)</th>
+    </tr>
+    </thead>
+    <tbody id="weather-data">
+    <tr>
+        <td id="temperature">-</td>
+        <td id="humidity">-</td>
+        <td id="pressure">-</td>
+    </tr>
+    </tbody>
+</table>
+
+<div class="measureTime" >Última actualització: <span id="measureTime"></span></div>
+
+<script>
+    const socket = new WebSocket('ws://localhost:2000');
+
+    socket.onopen = () => {
+        console.log("Connected to Antarctica Data Server Provider.");
+    };
+
+    socket.onmessage = (event) => {
+        const data = JSON.parse(event.data);
+        document.getElementById('temperature').textContent = data.temperature;
+        document.getElementById('humidity').textContent = data.humidity;
+        document.getElementById('pressure').textContent = data.pressure;
+        document.getElementById('measureTime').textContent = data.measureTime;
+    };
+
+    socket.onclose = () => {
+        console.log("Disconnected from Antarctica Data Server Provider. Refresh to connect again.");
+    };
+
+    socket.onerror = (error) => {
+        console.error("Connection error:", error);
+    };
+</script>
+</body>
+</html>
