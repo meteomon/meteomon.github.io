@@ -3,7 +3,8 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Weather Data Table</title>
+    <script src="https://challenges.cloudflare.com/turnstile/v0/api.js" async defer></script>
+    <title>MeteoMon</title>
     <style>
         table {
             width: 50%;
@@ -21,9 +22,11 @@
             margin-top: 10px;
         }
     </style>
+
 </head>
 <body>
 <h1 style="text-align: center;">Dades meteorològiques</h1>
+<div id="myWidget"></div>
 <table>
     <thead>
     <tr>
@@ -67,4 +70,11 @@
     };
 </script>
 </body>
+<footer>
+    <div
+  class="cf-turnstile"
+  data-sitekey="0x4AAAAAAA1aUVL_oDtGIZ9k"
+  data-callback="javascriptCallback"
+></div>
+</footer>
 </html>
