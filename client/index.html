@@ -48,10 +48,29 @@
 <div class="measureTime" >Última actualització: <span id="measureTime"></span></div>
 
 <script>
-    async function onTurnstileSuccess(token) {
-        console.log("Turnstile token:", token);
+    let socket = null;
 
-        const socket = new WebSocket(`wss://meteomon.antartica.pro?token=${encodeURIComponent(token)}`);
+    function waitForTurnstileResponse() {
+        // Polling until the Turnstile token is generated
+        const interval = setInterval(() => {
+            const tokenElement = document.querySelector("[name='cf-turnstile-response']");
+            const token = tokenElement ? tokenElement.value : null;
+
+            if (token) {
+                clearInterval(interval); // Stop polling
+                console.log("Turnstile token received:", token);
+                openWebSocket(token); // Open the WebSocket with the token
+            }
+        }, 100); // Check every 100ms
+    }
+
+    function openWebSocket(token) {
+        if (!token) {
+            console.error("Cannot open WebSocket: Token is null");
+            return;
+        }
+
+        socket = new WebSocket(`wss://meteomon.antartica.pro/?token=${encodeURIComponent(token)}`);
 
         socket.onopen = () => {
             console.log("Connected to Antarctica Data Server Provider.");
@@ -73,6 +92,9 @@
             console.error("Connection error:", error);
         };
     }
+
+    // Start waiting for Turnstile response
+    waitForTurnstileResponse();
 </script>
 </body>
 </html>
