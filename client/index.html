@@ -48,28 +48,31 @@
 <div class="measureTime" >Última actualització: <span id="measureTime"></span></div>
 
 <script>
-    const token = req.body['cf-turnstile-response'];
-    const socket = new WebSocket('wss://meteomon.antartica.pro?token=${encodeURIComponent(token)}');
+    async function onTurnstileSuccess(token) {
+        console.log("Turnstile token:", token);
 
-    socket.onopen = () => {
-        console.log("Connected to Antarctica Data Server Provider.");
-    };
+        const socket = new WebSocket(`wss://meteomon.antartica.pro?token=${encodeURIComponent(token)}`);
 
-    socket.onmessage = (event) => {
-        const data = JSON.parse(event.data);
-        document.getElementById('temperature').textContent = data.temperature;
-        document.getElementById('humidity').textContent = data.humidity;
-        document.getElementById('pressure').textContent = data.pressure;
-        document.getElementById('measureTime').textContent = data.measureTime;
-    };
+        socket.onopen = () => {
+            console.log("Connected to Antarctica Data Server Provider.");
+        };
 
-    socket.onclose = () => {
-        console.log("Disconnected from Antarctica Data Server Provider. Refresh to connect again.");
-    };
+        socket.onmessage = (event) => {
+            const data = JSON.parse(event.data);
+            document.getElementById('temperature').textContent = data.temperature;
+            document.getElementById('humidity').textContent = data.humidity;
+            document.getElementById('pressure').textContent = data.pressure;
+            document.getElementById('measureTime').textContent = data.measureTime;
+        };
 
-    socket.onerror = (error) => {
-        console.error("Connection error:", error);
-    };
+        socket.onclose = () => {
+            console.log("Disconnected from Antarctica Data Server Provider. Refresh to connect again.");
+        };
+
+        socket.onerror = (error) => {
+            console.error("Connection error:", error);
+        };
+    }
 </script>
 </body>
 </html>
