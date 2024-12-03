@@ -44,7 +44,7 @@
 <div class="measureTime" >Última actualització: <span id="measureTime"></span></div>
 
 <script>
-    const socket = new WebSocket('ws://localhost:2000');
+    const socket = new WebSocket('wss://meteomon.antartica.pro');
 
     socket.onopen = () => {
         console.log("Connected to Antarctica Data Server Provider.");
