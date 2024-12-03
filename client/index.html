@@ -25,6 +25,7 @@
 
 </head>
 <body>
+<div class="cf-turnstile" data-sitekey="0x4AAAAAAA1aUVL_oDtGIZ9k" data-callback="javascriptCallback"></div>
 <h1 style="text-align: center;">Dades meteorològiques</h1>
 <div id="myWidget"></div>
 <table>
@@ -47,7 +48,8 @@
 <div class="measureTime" >Última actualització: <span id="measureTime"></span></div>
 
 <script>
-    const socket = new WebSocket('wss://meteomon.antartica.pro');
+    const token = req.body['cf-turnstile-response'];
+    const socket = new WebSocket('wss://meteomon.antartica.pro?token=${encodeURIComponent(token)}');
 
     socket.onopen = () => {
         console.log("Connected to Antarctica Data Server Provider.");
@@ -70,11 +72,4 @@
     };
 </script>
 </body>
-<footer>
-    <div
-  class="cf-turnstile"
-  data-sitekey="0x4AAAAAAA1aUVL_oDtGIZ9k"
-  data-callback="javascriptCallback"
-></div>
-</footer>
 </html>
