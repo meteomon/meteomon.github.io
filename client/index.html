@@ -21,10 +21,27 @@
             font-style: italic;
             margin-top: 10px;
         }
+        #loading-indicator {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(255, 255, 255, 0.8);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            z-index: 9999;
+            font-size: 1.5rem;
+            color: #333;
+        }
+        #loading-indicator.hidden {
+            display: none;
+        }
     </style>
-
 </head>
 <body>
+<div id="loading-indicator">Carregant dades, si us plau espera :)</div>
 <div class="cf-turnstile" data-sitekey="0x4AAAAAAA1aUVL_oDtGIZ9k" data-callback="javascriptCallback"></div>
 <h1 style="text-align: center;">Dades meteorològiques</h1>
 <div id="myWidget"></div>
@@ -45,10 +62,19 @@
     </tbody>
 </table>
 
-<div class="measureTime" >Última actualització: <span id="measureTime"></span></div>
+<div class="measureTime">Última actualització: <span id="measureTime"></span></div>
 
 <script>
     let socket = null;
+
+    function showLoadingIndicator(show) {
+        const loadingIndicator = document.getElementById('loading-indicator');
+        if (show) {
+            loadingIndicator.classList.remove('hidden');
+        } else {
+            loadingIndicator.classList.add('hidden');
+        }
+    }
 
     function waitForTurnstileResponse() {
         // Polling until the Turnstile token is generated
@@ -67,6 +93,7 @@
     function openWebSocket(token) {
         if (!token) {
             console.error("Cannot open WebSocket: Token is null");
+            showLoadingIndicator(false);
             return;
         }
 
@@ -74,6 +101,7 @@
 
         socket.onopen = () => {
             console.log("Connected to Antarctica Data Server Provider.");
+            showLoadingIndicator(false); // Hide loading indicator
         };
 
         socket.onmessage = (event) => {
@@ -90,8 +118,12 @@
 
         socket.onerror = (error) => {
             console.error("Connection error:", error);
+            showLoadingIndicator(false); // Hide loading indicator in case of error
         };
     }
+
+    // Show the loading indicator when the page starts
+    showLoadingIndicator(true);
 
     // Start waiting for Turnstile response
     waitForTurnstileResponse();
