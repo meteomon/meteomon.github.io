@@ -195,32 +195,32 @@
 
         socket.onmessage = (event) => {
             const data = JSON.parse(event.data);
-            document.getElementById('solar.solar').textContent = data.solar.solar;
-            document.getElementById('solar.uvi').textContent = data.solar.uvi;
-
-            document.getElementById('wind.gust').textContent = data.wind.gust;
-            document.getElementById('wind.direction').textContent = data.wind.direction;
-            document.getElementById('wind.speed').textContent = data.wind.speed;
-
-            document.getElementById('pressure.absolute').textContent = data.pressure.absolute;
-            document.getElementById('pressure.relative').textContent = data.pressure.relative;
-
-            document.getElementById('rain.hourly').textContent = data.rain.hourly;
-            document.getElementById('rain.daily').textContent = data.rain.daily;
-            document.getElementById('rain.weekly').textContent = data.rain.weekly;
-            document.getElementById('rain.monthly').textContent = data.rain.monthly;
-            document.getElementById('rain.yearly').textContent = data.rain.yearly;
-            document.getElementById('rain.event').textContent = data.rain.event;
-            document.getElementById('rain.rate').textContent = data.rain.rate;
-
-            document.getElementById('outdoor.temperature').textContent = data.outdoor.temperature;
-            document.getElementById('outdoor.app_temp').textContent = data.outdoor.app_temp;
-            document.getElementById('outdoor.feels_like').textContent = data.outdoor.feels_like;
-            document.getElementById('outdoor.humidity').textContent = data.outdoor.humidity;
-            document.getElementById('outdoor.dew_point').textContent = data.outdoor.dew_point;
-
-            document.getElementById('id').textContent = data.id;
             document.getElementById('timestamp').textContent = data.timestamp;
+            
+            document.getElementById('solar.solar').textContent = data.solar_solar;
+            document.getElementById('solar.uvi').textContent = data.solar_uvi;
+
+            document.getElementById('wind.gust').textContent = data.wind_gust;
+            document.getElementById('wind.direction').textContent = data.wind_direction;
+
+            document.getElementById('wind.speed').textContent = data.wind_speed;
+            document.getElementById('pressure.absolute').textContent = data.pressure_absolute;
+
+            document.getElementById('pressure.relative').textContent = data.pressure_relative;
+            document.getElementById('rain.hourly').textContent = data.rain_hourly;
+            document.getElementById('rain.daily').textContent = data.rain_daily;
+            document.getElementById('rain.weekly').textContent = data.rain_weekly;
+            document.getElementById('rain.monthly').textContent = data.rain_monthly;
+            document.getElementById('rain.yearly').textContent = data.rain_yearly;
+            document.getElementById('rain.event').textContent = data.rain_event;
+
+            document.getElementById('rain.rate').textContent = data.rain_rate;
+            document.getElementById('outdoor.temperature').textContent = data.outdoor_temperature;
+            document.getElementById('outdoor.app_temp').textContent = data.outdoor_app_temp;
+            document.getElementById('outdoor.feels_like').textContent = data.outdoor_feels_like;
+            document.getElementById('outdoor.humidity').textContent = data.outdoor_humidity;
+
+            document.getElementById('outdoor.dew_point').textContent = data.outdoor_dew_point;
         };
 
         socket.onclose = () => {
