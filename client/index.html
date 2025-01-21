@@ -10,8 +10,10 @@
 <body>
 <div id="loading-indicator" class="hidden"> Validació del client en curs</div>
 <div class="cf-turnstile" data-sitekey="0x4AAAAAAA1aUVL_oDtGIZ9k" data-callback="javascriptCallback"></div>
-<h1>Meteomon - Dades meteorològiques</h1>
 <div id="myWidget"></div>
+
+<h1>Meteomon</h1>
+<h2>Meteomon - Dades meteorològiques d'Alaior en temps real</h2>
 <p>Última actualització: <span id="timestamp">-</span></p>
 <!-- Taula de Temperatura -->
 <h2>Temperatura</h2>
@@ -36,7 +38,7 @@
         <td id="outdoor.dew_point">-</td>
     </tr>
     <tr>
-        <td>Temperatura aparent </td>
+        <td>Temperatura aparent</td>
         <td id="outdoor.app_temp">-</td>
     </tr>
     </tbody>
@@ -196,11 +198,11 @@
         socket.onmessage = (event) => {
             const data = JSON.parse(event.data);
             document.getElementById('timestamp').textContent = data.timestamp;
-            
+
             document.getElementById('solar.solar').textContent = data.solar_solar;
             document.getElementById('solar.uvi').textContent = data.solar_uvi;
 
-            document.getElementById('wind.gust').textContent = data.wind_gust;
+            document.getElementById('wind.gust').textContent = `${data.wind_gust} km/h`;
             document.getElementById('wind.direction').textContent = data.wind_direction;
 
             document.getElementById('wind.speed').textContent = data.wind_speed;
