@@ -174,7 +174,6 @@
 
             if (token) {
                 clearInterval(interval); // Stop polling
-                console.log("Turnstile token received:", token);
                 openWebSocket(token); // Open the WebSocket with the token
             }
         }, 100); // Check every 100ms
@@ -196,29 +195,29 @@
 
         socket.onmessage = (event) => {
             const data = JSON.parse(event.data);
-            document.getElementById('solar.solar').textContent = `${data.solar.solar} W/m²`;
+            document.getElementById('solar.solar').textContent = data.solar.solar;
             document.getElementById('solar.uvi').textContent = data.solar.uvi;
 
-            document.getElementById('wind.gust').textContent = `${data.wind.gust} km/h`;
-            document.getElementById('wind.direction').textContent = `${data.wind.direction} °`;
-            document.getElementById('wind.speed').textContent = `${data.wind.speed} km/h`;
+            document.getElementById('wind.gust').textContent = data.wind.gust;
+            document.getElementById('wind.direction').textContent = data.wind.direction;
+            document.getElementById('wind.speed').textContent = data.wind.speed;
 
-            document.getElementById('pressure.absolute').textContent = `${data.pressure.absolute} hPa`;
-            document.getElementById('pressure.relative').textContent = `${data.pressure.relative} hPa`;
+            document.getElementById('pressure.absolute').textContent = data.pressure.absolute;
+            document.getElementById('pressure.relative').textContent = data.pressure.relative;
 
-            document.getElementById('rain.hourly').textContent = `${data.rain.hourly} mm`;
-            document.getElementById('rain.daily').textContent = `${data.rain.daily} mm`;
-            document.getElementById('rain.weekly').textContent = `${data.rain.weekly} mm`;
-            document.getElementById('rain.monthly').textContent = `${data.rain.monthly} mm`;
-            document.getElementById('rain.yearly').textContent = `${data.rain.yearly} mm`;
-            document.getElementById('rain.event').textContent = `${data.rain.event} mm`;
-            document.getElementById('rain.rate').textContent = `${data.rain.rate} mm/h`;
+            document.getElementById('rain.hourly').textContent = data.rain.hourly;
+            document.getElementById('rain.daily').textContent = data.rain.daily;
+            document.getElementById('rain.weekly').textContent = data.rain.weekly;
+            document.getElementById('rain.monthly').textContent = data.rain.monthly;
+            document.getElementById('rain.yearly').textContent = data.rain.yearly;
+            document.getElementById('rain.event').textContent = data.rain.event;
+            document.getElementById('rain.rate').textContent = data.rain.rate;
 
-            document.getElementById('outdoor.temperature').textContent = `${data.outdoor.temperature} °C`;
-            document.getElementById('outdoor.app_temp').textContent = `${data.outdoor.app_temp} °C`;
-            document.getElementById('outdoor.feels_like').textContent = `${data.outdoor.feels_like} °C`;
-            document.getElementById('outdoor.humidity').textContent = `${data.outdoor.humidity} %`;
-            document.getElementById('outdoor.dew_point').textContent = `${data.outdoor.dew_point} °C`;
+            document.getElementById('outdoor.temperature').textContent = data.outdoor.temperature;
+            document.getElementById('outdoor.app_temp').textContent = data.outdoor.app_temp;
+            document.getElementById('outdoor.feels_like').textContent = data.outdoor.feels_like;
+            document.getElementById('outdoor.humidity').textContent = data.outdoor.humidity;
+            document.getElementById('outdoor.dew_point').textContent = data.outdoor.dew_point;
 
             document.getElementById('id').textContent = data.id;
             document.getElementById('timestamp').textContent = data.timestamp;
