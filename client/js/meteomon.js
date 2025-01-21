@@ -10,17 +10,16 @@ function showLoadingIndicator(show) {
 }
 
 function waitForTurnstileResponse() {
-    // Polling until the Turnstile token is generated
     const interval = setInterval(() => {
         const tokenElement = document.querySelector("[name='cf-turnstile-response']");
         const token = tokenElement ? tokenElement.value : null;
 
         if (token) {
-            clearInterval(interval); // Stop polling
+            clearInterval(interval);
             console.log("Turnstile token received:", token);
-            openWebSocket(token); // Open the WebSocket with the token
+            openWebSocket(token);
         }
-    }, 100); // Check every 100ms
+    }, 100);
 }
 
 function openWebSocket(token) {
@@ -34,12 +33,12 @@ function openWebSocket(token) {
 
     socket.onopen = () => {
         console.log("Connected to Antarctica Data Server Provider.");
-        showLoadingIndicator(false); // Hide loading indicator
+        showLoadingIndicator(false);
     };
 
     socket.onmessage = (event) => {
         const data = JSON.parse(event.data);
-        document.getElementById('timestamp').textContent = data.timestamp;
+        document.getElementById('timestamp').textContent = formatTimestamp(data.timestamp);
         document.getElementById('solar.solar').textContent = `${data.solar_solar} W/m²`;
         document.getElementById('solar.uvi').textContent = data.solar_uvi;
 
@@ -71,12 +70,26 @@ function openWebSocket(token) {
 
     socket.onerror = (error) => {
         console.error("Connection error:", error);
-        showLoadingIndicator(false); // Hide loading indicator in case of error
+        showLoadingIndicator(false);
     };
 }
 
-// Show the loading indicator when the page starts
 showLoadingIndicator(true);
 
-// Start waiting for Turnstile response
 waitForTurnstileResponse();
+
+function formatTimestamp(timestamp) {
+    const date = new Date(timestamp);
+    const options = {
+        day: '2-digit',
+        month: '2-digit',
+        year: 'numeric',
+        hour: '2-digit',
+        minute: '2-digit',
+        second: '2-digit',
+        timeZone: 'CET',
+        hour12: false
+    };
+    const formatter = new Intl.DateTimeFormat('es-ES', options);
+    return formatter.format(date);
+}
