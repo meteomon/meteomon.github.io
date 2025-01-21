@@ -13,7 +13,7 @@
 <div id="myWidget"></div>
 
 <h1>Meteomon</h1>
-<h2>Meteomon - Dades meteorològiques d'Alaior en temps real</h2>
+<h2>Dades meteorològiques d'Alaior en temps real</h2>
 <p>Última actualització: <span id="timestamp">-</span></p>
 <!-- Taula de Temperatura -->
 <h2>Temperatura</h2>
@@ -155,91 +155,6 @@
     </tr>
     </tbody>
 </table>
-
-<script>
-    let socket = null;
-
-    function showLoadingIndicator(show) {
-        const loadingIndicator = document.getElementById('loading-indicator');
-        if (show) {
-            loadingIndicator.classList.remove('hidden');
-        } else {
-            loadingIndicator.classList.add('hidden');
-        }
-    }
-
-    function waitForTurnstileResponse() {
-        // Polling until the Turnstile token is generated
-        const interval = setInterval(() => {
-            const tokenElement = document.querySelector("[name='cf-turnstile-response']");
-            const token = tokenElement ? tokenElement.value : null;
-
-            if (token) {
-                clearInterval(interval); // Stop polling
-                openWebSocket(token); // Open the WebSocket with the token
-            }
-        }, 100); // Check every 100ms
-    }
-
-    function openWebSocket(token) {
-        if (!token) {
-            console.error("Cannot open WebSocket: Token is null");
-            showLoadingIndicator(false);
-            return;
-        }
-
-        socket = new WebSocket(`wss://meteomon.antartica.pro/?token=${encodeURIComponent(token)}`);
-
-        socket.onopen = () => {
-            console.log("Connected to Antarctica Data Server Provider.");
-            showLoadingIndicator(false); // Hide loading indicator
-        };
-
-        socket.onmessage = (event) => {
-            const data = JSON.parse(event.data);
-            document.getElementById('timestamp').textContent = data.timestamp;
-
-            document.getElementById('solar.solar').textContent = data.solar_solar;
-            document.getElementById('solar.uvi').textContent = data.solar_uvi;
-
-            document.getElementById('wind.gust').textContent = `${data.wind_gust} km/h`;
-            document.getElementById('wind.direction').textContent = data.wind_direction;
-
-            document.getElementById('wind.speed').textContent = data.wind_speed;
-            document.getElementById('pressure.absolute').textContent = data.pressure_absolute;
-
-            document.getElementById('pressure.relative').textContent = data.pressure_relative;
-            document.getElementById('rain.hourly').textContent = data.rain_hourly;
-            document.getElementById('rain.daily').textContent = data.rain_daily;
-            document.getElementById('rain.weekly').textContent = data.rain_weekly;
-            document.getElementById('rain.monthly').textContent = data.rain_monthly;
-            document.getElementById('rain.yearly').textContent = data.rain_yearly;
-            document.getElementById('rain.event').textContent = data.rain_event;
-
-            document.getElementById('rain.rate').textContent = data.rain_rate;
-            document.getElementById('outdoor.temperature').textContent = data.outdoor_temperature;
-            document.getElementById('outdoor.app_temp').textContent = data.outdoor_app_temp;
-            document.getElementById('outdoor.feels_like').textContent = data.outdoor_feels_like;
-            document.getElementById('outdoor.humidity').textContent = data.outdoor_humidity;
-
-            document.getElementById('outdoor.dew_point').textContent = data.outdoor_dew_point;
-        };
-
-        socket.onclose = () => {
-            console.log("Disconnected from Antarctica Data Server Provider. Refresh to connect again.");
-        };
-
-        socket.onerror = (error) => {
-            console.error("Connection error:", error);
-            showLoadingIndicator(false); // Hide loading indicator in case of error
-        };
-    }
-
-    // Show the loading indicator when the page starts
-    showLoadingIndicator(true);
-
-    // Start waiting for Turnstile response
-    waitForTurnstileResponse();
-</script>
+<script src="js/meteomon.js"></script>
 </body>
 </html>
