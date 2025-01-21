@@ -1,132 +1,156 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="ca">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <script src="https://challenges.cloudflare.com/turnstile/v0/api.js" async defer></script>
-    <title>MeteoMon</title>
-    <style>
-        table {
-            width: 50%;
-            margin: 20px auto;
-            border-collapse: collapse;
-        }
-        th, td {
-            padding: 10px;
-            border: 1px solid #ddd;
-            text-align: center;
-        }
-        .measureTime {
-            text-align: center;
-            font-style: italic;
-            margin-top: 10px;
-        }
-        #loading-indicator {
-            position: fixed;
-            top: 0;
-            left: 0;
-            width: 100%;
-            height: 100%;
-            background: rgba(255, 255, 255, 0.8);
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            z-index: 9999;
-            font-size: 1.5rem;
-            color: #333;
-        }
-        #loading-indicator.hidden {
-            display: none;
-        }
-    </style>
+    <title>Valors Meteorològics</title>
+    <link rel="stylesheet" href="css/styles.css"> <!-- Enllaç al fitxer CSS extern -->
 </head>
 <body>
-<div id="loading-indicator">Carregant dades, si us plau espera :)</div>
-<div class="cf-turnstile" data-sitekey="0x4AAAAAAA1aUVL_oDtGIZ9k" data-callback="javascriptCallback"></div>
-<h1 style="text-align: center;">Dades meteorològiques</h1>
-<div id="myWidget"></div>
+<div id="loading-indicator" class="hidden"> Validació del client en curs</div>
+<h1>Meteomon - Dades meteorològiques</h1>
+<p>Última actualització:<span id="timestamp">2025-01-21T21:31:30Z</span></p>
+<!-- Taula de Temperatura -->
+<h2>Temperatura</h2>
 <table>
     <thead>
     <tr>
-        <th>Temperatura (°C)</th>
-        <th>Humitat (%)</th>
-        <th>Pressió (hPa)</th>
+        <th>Paràmetre</th>
+        <th>Valor</th>
     </tr>
     </thead>
-    <tbody id="weather-data">
+    <tbody>
     <tr>
-        <td id="temperature">-</td>
-        <td id="humidity">-</td>
-        <td id="pressure">-</td>
+        <td>Temperatura</td>
+        <td id="outdoor.temperature">14 °C</td>
+    </tr>
+    <tr>
+        <td>Sensació tèrmica</td>
+        <td id="outdoor.feels_like">14 °C</td>
+    </tr>
+    <tr>
+        <td>Punt de rosada</td>
+        <td id="outdoor.dew_point">12.6 °C</td>
+    </tr>
+    <tr>
+        <td>Temperatura aparent </td>
+        <td id="outdoor.app_temp">13.9 °C</td>
     </tr>
     </tbody>
 </table>
 
-<div class="measureTime">Última actualització: <span id="measureTime"></span></div>
+<!-- Taula d'Humitat i Pressió -->
+<h2>Humitat i Pressió</h2>
+<table>
+    <thead>
+    <tr>
+        <th>Paràmetre</th>
+        <th>Valor</th>
+    </tr>
+    </thead>
+    <tbody>
+    <tr>
+        <td>Humitat</td>
+        <td id="outdoor.humidity">91 %</td>
+    </tr>
+    <tr>
+        <td>Pressió relativa</td>
+        <td id="pressure.relative">1001.9 hPa</td>
+    </tr>
+    <tr>
+        <td>Pressió absoluta</td>
+        <td id="pressure.absolute">1001.9 hPa</td>
+    </tr>
+    </tbody>
+</table>
 
-<script>
-    let socket = null;
+<!-- Taula de Vent -->
+<h2>Vent</h2>
+<table>
+    <thead>
+    <tr>
+        <th>Paràmetre</th>
+        <th>Valor</th>
+    </tr>
+    </thead>
+    <tbody>
+    <tr>
+        <td>Velocitat màxima del vent (ràfega)</td>
+        <td id="wind.gust">11.2 km/h</td>
+    </tr>
+    <tr>
+        <td>Direcció del vent</td>
+        <td id="wind.direction">224 °</td>
+    </tr>
+    <tr>
+        <td>Velocitat del vent</td>
+        <td id="wind.speed">4.7 km/h</td>
+    </tr>
+    </tbody>
+</table>
 
-    function showLoadingIndicator(show) {
-        const loadingIndicator = document.getElementById('loading-indicator');
-        if (show) {
-            loadingIndicator.classList.remove('hidden');
-        } else {
-            loadingIndicator.classList.add('hidden');
-        }
-    }
+<!-- Taula de Pluja -->
+<h2>Pluja</h2>
+<table>
+    <thead>
+    <tr>
+        <th>Paràmetre</th>
+        <th>Valor</th>
+    </tr>
+    </thead>
+    <tbody>
+    <tr>
+        <td>Pluja per hora</td>
+        <td id="rain.hourly">0 mm</td>
+    </tr>
+    <tr>
+        <td>Pluja diària</td>
+        <td id="rain.daily">0 mm</td>
+    </tr>
+    <tr>
+        <td>Pluja setmanal</td>
+        <td id="rain.weekly">3.8 mm</td>
+    </tr>
+    <tr>
+        <td>Pluja mensual</td>
+        <td id="rain.monthly">33.3 mm</td>
+    </tr>
+    <tr>
+        <td>Pluja anual</td>
+        <td id="rain.yearly">33.3 mm</td>
+    </tr>
+    <tr>
+        <td>Pluja d'event</td>
+        <td id="rain.event">0 mm</td>
+    </tr>
+    <tr>
+        <td>Taxa de pluja</td>
+        <td id="rain.rate">0 mm/h</td>
+    </tr>
+    </tbody>
+</table>
 
-    function waitForTurnstileResponse() {
-        // Polling until the Turnstile token is generated
-        const interval = setInterval(() => {
-            const tokenElement = document.querySelector("[name='cf-turnstile-response']");
-            const token = tokenElement ? tokenElement.value : null;
+<!-- Taula Solar -->
+<h2>Solar</h2>
+<table>
+    <thead>
+    <tr>
+        <th>Paràmetre</th>
+        <th>Valor</th>
+    </tr>
+    </thead>
+    <tbody>
+    <tr>
+        <td>Radiació solar</td>
+        <td id="solar.solar">0 W/m²</td>
+    </tr>
+    <tr>
+        <td>Índex UV</td>
+        <td id="solar.uvi">0</td>
+    </tr>
+    </tbody>
+</table>
 
-            if (token) {
-                clearInterval(interval); // Stop polling
-                console.log("Turnstile token received:", token);
-                openWebSocket(token); // Open the WebSocket with the token
-            }
-        }, 100); // Check every 100ms
-    }
-
-    function openWebSocket(token) {
-        if (!token) {
-            console.error("Cannot open WebSocket: Token is null");
-            showLoadingIndicator(false);
-            return;
-        }
-
-        socket = new WebSocket(`wss://meteomon.antartica.pro/?token=${encodeURIComponent(token)}`);
-
-        socket.onopen = () => {
-            console.log("Connected to Antarctica Data Server Provider.");
-            showLoadingIndicator(false); // Hide loading indicator
-        };
-
-        socket.onmessage = (event) => {
-            const data = JSON.parse(event.data);
-            document.getElementById('temperature').textContent = data.temperature;
-            document.getElementById('humidity').textContent = data.humidity;
-            document.getElementById('pressure').textContent = data.pressure;
-            document.getElementById('measureTime').textContent = data.measureTime;
-        };
-
-        socket.onclose = () => {
-            console.log("Disconnected from Antarctica Data Server Provider. Refresh to connect again.");
-        };
-
-        socket.onerror = (error) => {
-            console.error("Connection error:", error);
-            showLoadingIndicator(false); // Hide loading indicator in case of error
-        };
-    }
-
-    // Show the loading indicator when the page starts
-    showLoadingIndicator(true);
-
-    // Start waiting for Turnstile response
-    waitForTurnstileResponse();
-</script>
+<script src="js/meteomon.js"></script>
 </body>
 </html>
