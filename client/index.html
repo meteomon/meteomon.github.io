@@ -3,13 +3,16 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Valors Meteorològics</title>
+    <title>Meteomon</title>
+    <script src="https://challenges.cloudflare.com/turnstile/v0/api.js" async defer></script>
     <link rel="stylesheet" href="css/styles.css"> <!-- Enllaç al fitxer CSS extern -->
 </head>
 <body>
 <div id="loading-indicator" class="hidden"> Validació del client en curs</div>
+<div class="cf-turnstile" data-sitekey="0x4AAAAAAA1aUVL_oDtGIZ9k" data-callback="javascriptCallback"></div>
 <h1>Meteomon - Dades meteorològiques</h1>
-<p>Última actualització:<span id="timestamp">2025-01-21T21:31:30Z</span></p>
+<div id="myWidget"></div>
+<p>Última actualització: <span id="timestamp">-</span></p>
 <!-- Taula de Temperatura -->
 <h2>Temperatura</h2>
 <table>
@@ -22,19 +25,19 @@
     <tbody>
     <tr>
         <td>Temperatura</td>
-        <td id="outdoor.temperature">14 °C</td>
+        <td id="outdoor.temperature">-</td>
     </tr>
     <tr>
         <td>Sensació tèrmica</td>
-        <td id="outdoor.feels_like">14 °C</td>
+        <td id="outdoor.feels_like">-</td>
     </tr>
     <tr>
         <td>Punt de rosada</td>
-        <td id="outdoor.dew_point">12.6 °C</td>
+        <td id="outdoor.dew_point">-</td>
     </tr>
     <tr>
         <td>Temperatura aparent </td>
-        <td id="outdoor.app_temp">13.9 °C</td>
+        <td id="outdoor.app_temp">-</td>
     </tr>
     </tbody>
 </table>
@@ -51,15 +54,15 @@
     <tbody>
     <tr>
         <td>Humitat</td>
-        <td id="outdoor.humidity">91 %</td>
+        <td id="outdoor.humidity">-</td>
     </tr>
     <tr>
         <td>Pressió relativa</td>
-        <td id="pressure.relative">1001.9 hPa</td>
+        <td id="pressure.relative">-</td>
     </tr>
     <tr>
         <td>Pressió absoluta</td>
-        <td id="pressure.absolute">1001.9 hPa</td>
+        <td id="pressure.absolute">-</td>
     </tr>
     </tbody>
 </table>
@@ -76,15 +79,15 @@
     <tbody>
     <tr>
         <td>Velocitat màxima del vent (ràfega)</td>
-        <td id="wind.gust">11.2 km/h</td>
+        <td id="wind.gust">-</td>
     </tr>
     <tr>
         <td>Direcció del vent</td>
-        <td id="wind.direction">224 °</td>
+        <td id="wind.direction">-</td>
     </tr>
     <tr>
         <td>Velocitat del vent</td>
-        <td id="wind.speed">4.7 km/h</td>
+        <td id="wind.speed">-</td>
     </tr>
     </tbody>
 </table>
@@ -101,31 +104,31 @@
     <tbody>
     <tr>
         <td>Pluja per hora</td>
-        <td id="rain.hourly">0 mm</td>
+        <td id="rain.hourly">-</td>
     </tr>
     <tr>
         <td>Pluja diària</td>
-        <td id="rain.daily">0 mm</td>
+        <td id="rain.daily">-</td>
     </tr>
     <tr>
         <td>Pluja setmanal</td>
-        <td id="rain.weekly">3.8 mm</td>
+        <td id="rain.weekly">-</td>
     </tr>
     <tr>
         <td>Pluja mensual</td>
-        <td id="rain.monthly">33.3 mm</td>
+        <td id="rain.monthly">-</td>
     </tr>
     <tr>
         <td>Pluja anual</td>
-        <td id="rain.yearly">33.3 mm</td>
+        <td id="rain.yearly">-</td>
     </tr>
     <tr>
         <td>Pluja d'event</td>
-        <td id="rain.event">0 mm</td>
+        <td id="rain.event">-</td>
     </tr>
     <tr>
         <td>Taxa de pluja</td>
-        <td id="rain.rate">0 mm/h</td>
+        <td id="rain.rate">-</td>
     </tr>
     </tbody>
 </table>
@@ -142,15 +145,100 @@
     <tbody>
     <tr>
         <td>Radiació solar</td>
-        <td id="solar.solar">0 W/m²</td>
+        <td id="solar.solar">-</td>
     </tr>
     <tr>
         <td>Índex UV</td>
-        <td id="solar.uvi">0</td>
+        <td id="solar.uvi">-</td>
     </tr>
     </tbody>
 </table>
 
-<script src="js/meteomon.js"></script>
+<script>
+    let socket = null;
+
+    function showLoadingIndicator(show) {
+        const loadingIndicator = document.getElementById('loading-indicator');
+        if (show) {
+            loadingIndicator.classList.remove('hidden');
+        } else {
+            loadingIndicator.classList.add('hidden');
+        }
+    }
+
+    function waitForTurnstileResponse() {
+        // Polling until the Turnstile token is generated
+        const interval = setInterval(() => {
+            const tokenElement = document.querySelector("[name='cf-turnstile-response']");
+            const token = tokenElement ? tokenElement.value : null;
+
+            if (token) {
+                clearInterval(interval); // Stop polling
+                console.log("Turnstile token received:", token);
+                openWebSocket(token); // Open the WebSocket with the token
+            }
+        }, 100); // Check every 100ms
+    }
+
+    function openWebSocket(token) {
+        if (!token) {
+            console.error("Cannot open WebSocket: Token is null");
+            showLoadingIndicator(false);
+            return;
+        }
+
+        socket = new WebSocket(`wss://meteomon.antartica.pro/?token=${encodeURIComponent(token)}`);
+
+        socket.onopen = () => {
+            console.log("Connected to Antarctica Data Server Provider.");
+            showLoadingIndicator(false); // Hide loading indicator
+        };
+
+        socket.onmessage = (event) => {
+            const data = JSON.parse(event.data);
+            document.getElementById('solar.solar').textContent = `${data.solar.solar} W/m²`;
+            document.getElementById('solar.uvi').textContent = data.solar.uvi;
+
+            document.getElementById('wind.gust').textContent = `${data.wind.gust} km/h`;
+            document.getElementById('wind.direction').textContent = `${data.wind.direction} °`;
+            document.getElementById('wind.speed').textContent = `${data.wind.speed} km/h`;
+
+            document.getElementById('pressure.absolute').textContent = `${data.pressure.absolute} hPa`;
+            document.getElementById('pressure.relative').textContent = `${data.pressure.relative} hPa`;
+
+            document.getElementById('rain.hourly').textContent = `${data.rain.hourly} mm`;
+            document.getElementById('rain.daily').textContent = `${data.rain.daily} mm`;
+            document.getElementById('rain.weekly').textContent = `${data.rain.weekly} mm`;
+            document.getElementById('rain.monthly').textContent = `${data.rain.monthly} mm`;
+            document.getElementById('rain.yearly').textContent = `${data.rain.yearly} mm`;
+            document.getElementById('rain.event').textContent = `${data.rain.event} mm`;
+            document.getElementById('rain.rate').textContent = `${data.rain.rate} mm/h`;
+
+            document.getElementById('outdoor.temperature').textContent = `${data.outdoor.temperature} °C`;
+            document.getElementById('outdoor.app_temp').textContent = `${data.outdoor.app_temp} °C`;
+            document.getElementById('outdoor.feels_like').textContent = `${data.outdoor.feels_like} °C`;
+            document.getElementById('outdoor.humidity').textContent = `${data.outdoor.humidity} %`;
+            document.getElementById('outdoor.dew_point').textContent = `${data.outdoor.dew_point} °C`;
+
+            document.getElementById('id').textContent = data.id;
+            document.getElementById('timestamp').textContent = data.timestamp;
+        };
+
+        socket.onclose = () => {
+            console.log("Disconnected from Antarctica Data Server Provider. Refresh to connect again.");
+        };
+
+        socket.onerror = (error) => {
+            console.error("Connection error:", error);
+            showLoadingIndicator(false); // Hide loading indicator in case of error
+        };
+    }
+
+    // Show the loading indicator when the page starts
+    showLoadingIndicator(true);
+
+    // Start waiting for Turnstile response
+    waitForTurnstileResponse();
+</script>
 </body>
 </html>
