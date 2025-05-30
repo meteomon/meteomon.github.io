@@ -16,7 +16,6 @@ function waitForTurnstileResponse() {
 
         if (token) {
             clearInterval(interval);
-            console.log("Turnstile token received:", token);
             openWebSocket(token);
         }
     }, 100);
@@ -29,7 +28,7 @@ function openWebSocket(token) {
         return;
     }
 
-    socket = new WebSocket(`wss://meteomon.antartica.pro/?token=${encodeURIComponent(token)}`);
+    socket = new WebSocket(`wss://meteomon.antarctica.pm/?token=${encodeURIComponent(token)}`);
 
     socket.onopen = () => {
         console.log("Connected to Antarctica Data Server Provider.");
