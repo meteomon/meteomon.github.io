@@ -9,26 +9,22 @@ function showLoadingIndicator(show) {
     }
 }
 
-function waitForTurnstileResponse() {
-    const interval = setInterval(() => {
-        const tokenElement = document.querySelector("[name='cf-turnstile-response']");
-        const token = tokenElement ? tokenElement.value : null;
+function turnstileSuccess(token) {
+    console.log("Turnstile validated.");
 
-        if (token) {
-            clearInterval(interval);
-            openWebSocket(token);
-        }
-    }, 100);
+    openWebSocket(token);
 }
 
 function openWebSocket(token) {
+
     if (!token) {
         console.error("Cannot open WebSocket: Token is null");
-        showLoadingIndicator(false);
         return;
     }
 
-    socket = new WebSocket(`wss://meteomon.antarctica.pm/?token=${encodeURIComponent(token)}`);
+    socket = new WebSocket(
+        `wss://meteomon.antarctica.pm/?token=${encodeURIComponent(token)}`
+    );
 
     socket.onopen = () => {
         console.log("Connected to Antarctica Data Server Provider.");
@@ -36,8 +32,11 @@ function openWebSocket(token) {
     };
 
     socket.onmessage = (event) => {
+
         const data = JSON.parse(event.data);
+
         document.getElementById('timestamp').textContent = formatTimestamp(data.timestamp);
+
         document.getElementById('solar.solar').textContent = `${data.solar_solar} W/m²`;
         document.getElementById('solar.uvi').textContent = data.solar_uvi;
 
@@ -75,8 +74,6 @@ function openWebSocket(token) {
 
 showLoadingIndicator(true);
 
-waitForTurnstileResponse();
-
 function formatTimestamp(timestamp) {
     const date = new Date(timestamp);
     const options = {
@@ -89,6 +86,6 @@ function formatTimestamp(timestamp) {
         timeZone: 'CET',
         hour12: false
     };
-    const formatter = new Intl.DateTimeFormat('es-ES', options);
-    return formatter.format(date);
+
+    return new Intl.DateTimeFormat('es-ES', options).format(date);
 }
